@@ -3,15 +3,14 @@ let products = JSON.parse(localStorage.getItem("products")) || [];
 let cart = [];
 
 let eventData = JSON.parse(localStorage.getItem("eventData")) || {
-    active:false,
-    startingCash:0,
     cashSales:0,
     cardSales:0
 };
 
 
 
-// SAVE
+
+// SAVE DATA
 
 function saveProducts(){
 
@@ -34,6 +33,7 @@ function saveEvent(){
 
 
 
+
 // PAGE SWITCH
 
 function showPage(page){
@@ -46,26 +46,25 @@ function showPage(page){
     .classList.remove("hidden");
 
 
-    updateDashboard();
 
+    if(page==="checkout"){
 
-    if(page==="inventory"){
-        displayInventory();
+        displayCheckout();
+
     }
 
 
-    if(page==="checkout"){
-        displayCheckout();
+    if(page==="inventory"){
+
+        displayInventory();
+
     }
 
 
     if(page==="barcodes"){
+
         loadBarcodeList();
-    }
 
-
-    if(page==="event"){
-        updateEvent();
     }
 
 }
@@ -73,8 +72,7 @@ function showPage(page){
 
 
 
-
-// BARCODE CREATOR
+// CREATE BARCODE
 
 function generateBarcode(){
 
@@ -99,33 +97,41 @@ document.getElementById("barcode").value;
 
 if(barcode===""){
 
-    barcode = generateBarcode();
+    barcode=generateBarcode();
 
 }
 
 
 
-let product = {
+let product={
+
 
 id:Date.now(),
 
 name:
 document.getElementById("name").value,
 
+
 price:
 Number(document.getElementById("price").value),
+
 
 size:
 document.getElementById("size").value,
 
+
 barcode:barcode,
+
 
 stock:
 Number(document.getElementById("stock").value),
 
+
 photo:""
 
+
 };
+
 
 
 
@@ -152,7 +158,7 @@ products.push(product);
 saveProducts();
 
 
-alert("Added");
+alert("Product Added");
 
 
 };
@@ -160,7 +166,6 @@ alert("Added");
 
 
 reader.readAsDataURL(file);
-
 
 
 }
@@ -172,20 +177,427 @@ products.push(product);
 
 saveProducts();
 
-}
-
-
 
 }
 
 
 
+}
 
 
 
 
 
-// INVENTORY
+
+
+
+
+// CHECKOUT PRODUCTS WITH PHOTOS
+
+
+function displayCheckout(){
+
+
+let box =
+document.getElementById("productButtons");
+
+
+box.innerHTML="";
+
+
+
+products.forEach(p=>{
+
+
+box.innerHTML += `
+
+
+<div class="productButton"
+onclick="addToCart(${p.id})">
+
+
+<img src="${p.photo || ''}">
+
+
+<h3>${p.name}</h3>
+
+
+<p>
+$${p.price}
+</p>
+
+
+<p>
+Stock: ${p.stock}
+</p>
+
+
+</div>
+
+
+`;
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// ADD TO CART
+
+
+function addToCart(id){
+
+
+let product =
+products.find(p=>p.id===id);
+
+
+
+if(product.stock<=0){
+
+alert("Out of stock");
+
+return;
+
+}
+
+
+
+
+let item =
+cart.find(c=>c.id===id);
+
+
+
+if(item){
+
+    item.qty++;
+
+}
+
+else{
+
+
+cart.push({
+
+id:product.id,
+
+name:product.name,
+
+price:product.price,
+
+qty:1
+
+});
+
+
+}
+
+
+
+displayCart();
+
+
+}
+
+
+
+
+
+
+
+
+// DISPLAY CART
+
+
+function displayCart(){
+
+
+let box =
+document.getElementById("cart");
+
+
+box.innerHTML="";
+
+
+
+let total=0;
+
+
+
+cart.forEach(item=>{
+
+
+total += item.price * item.qty;
+
+
+
+box.innerHTML += `
+
+
+<div class="cartItem">
+
+
+<h3>${item.name}</h3>
+
+
+<p>
+$${item.price} × ${item.qty}
+</p>
+
+
+
+<button onclick="changeQty(${item.id},1)">
+➕
+</button>
+
+
+
+<button onclick="changeQty(${item.id},-1)">
+➖
+</button>
+
+
+
+<button class="removeCart"
+onclick="removeFromCart(${item.id})">
+
+🗑 Remove
+
+</button>
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+document.getElementById("cartTotal")
+.innerHTML =
+total.toFixed(2);
+
+
+}
+
+
+
+
+
+
+
+
+
+// CHANGE QUANTITY
+
+
+function changeQty(id,amount){
+
+
+let item =
+cart.find(c=>c.id===id);
+
+
+
+item.qty += amount;
+
+
+
+if(item.qty<=0){
+
+removeFromCart(id);
+
+}
+
+else{
+
+displayCart();
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+// REMOVE ONE ITEM
+
+
+function removeFromCart(id){
+
+
+cart =
+cart.filter(
+item=>item.id!==id
+);
+
+
+displayCart();
+
+
+}
+
+
+
+
+
+
+
+
+// CLEAR CART
+
+
+function clearCart(){
+
+
+if(confirm("Clear cart?")){
+
+
+cart=[];
+
+
+displayCart();
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+// COMPLETE SALE
+
+
+function completeSale(){
+
+
+if(cart.length===0){
+
+alert("Cart is empty");
+
+return;
+
+}
+
+
+
+let total=0;
+
+
+
+cart.forEach(item=>{
+
+
+let product =
+products.find(
+p=>p.id===item.id
+);
+
+
+
+product.stock -= item.qty;
+
+
+
+total += item.price * item.qty;
+
+
+
+});
+
+
+
+saveProducts();
+
+
+
+let payment =
+prompt(
+"Type CASH or CARD"
+);
+
+
+
+if(payment){
+
+
+payment =
+payment.toLowerCase();
+
+
+
+if(payment==="cash"){
+
+eventData.cashSales += total;
+
+}
+
+
+
+if(payment==="card"){
+
+eventData.cardSales += total;
+
+}
+
+
+
+saveEvent();
+
+
+}
+
+
+
+cart=[];
+
+
+displayCart();
+
+
+displayCheckout();
+
+
+alert("Sale Complete");
+
+
+}
+
+
+
+
+
+
+
+
+
+// INVENTORY DISPLAY
+
 
 function displayInventory(){
 
@@ -210,12 +622,9 @@ box.innerHTML += `
 <img src="${p.photo || ''}">
 
 
-<h3>${p.name}</h3>
-
-
-<p>
-Price: $${p.price}
-</p>
+<h2>
+${p.name}
+</h2>
 
 
 <p>
@@ -223,21 +632,9 @@ Stock: ${p.stock}
 </p>
 
 
-
-<svg id="bar-${p.id}"></svg>
-
-
-
-<button onclick="addStock(${p.id})">
-➕ Stock
-</button>
-
-
-
-<button onclick="removeStock(${p.id})">
-➖ Stock
-</button>
-
+<p>
+Barcode: ${p.barcode}
+</p>
 
 
 </div>
@@ -245,633 +642,10 @@ Stock: ${p.stock}
 
 `;
 
-
-
-setTimeout(()=>{
-
-JsBarcode(
-"#bar-"+p.id,
-p.barcode
-);
-
-
-},100);
-
-
-
 });
 
 
 }
-
-
-
-
-
-
-function addStock(id){
-
-
-let amount =
-Number(prompt("Add amount"));
-
-
-
-let p =
-products.find(x=>x.id===id);
-
-
-p.stock += amount;
-
-
-saveProducts();
-
-
-displayInventory();
-
-
-}
-
-
-
-function removeStock(id){
-
-
-let amount =
-Number(prompt("Remove amount"));
-
-
-
-let p =
-products.find(x=>x.id===id);
-
-
-p.stock -= amount;
-
-
-if(p.stock<0){
-
-p.stock=0;
-
-}
-
-
-saveProducts();
-
-
-displayInventory();
-
-
-}
-
-
-
-
-
-
-
-
-// CHECKOUT
-
-
-function displayCheckout(){
-
-
-let box =
-document.getElementById("productButtons");
-
-
-box.innerHTML="";
-
-
-
-products.forEach(p=>{
-
-
-box.innerHTML += `
-
-
-<button onclick="addToCart(${p.id})">
-
-${p.name}
-
-<br>
-
-$${p.price}
-
-</button>
-
-
-`;
-
-
-});
-
-
-}
-
-
-
-
-
-function addToCart(id){
-
-
-let p =
-products.find(x=>x.id===id);
-
-
-let item =
-cart.find(x=>x.id===id);
-
-
-
-if(item){
-
-item.qty++;
-
-}
-
-else{
-
-
-cart.push({
-
-id:p.id,
-
-name:p.name,
-
-price:p.price,
-
-qty:1
-
-});
-
-
-}
-
-
-
-displayCart();
-
-
-}
-
-
-
-
-
-function displayCart(){
-
-
-let box =
-document.getElementById("cart");
-
-
-box.innerHTML="";
-
-
-let total=0;
-
-
-
-cart.forEach(i=>{
-
-
-total+=i.price*i.qty;
-
-
-box.innerHTML += `
-
-
-<div class="cartItem">
-
-${i.name}
-
-x${i.qty}
-
-</div>
-
-
-`;
-
-
-});
-
-
-document.getElementById("cartTotal")
-.innerHTML=total.toFixed(2);
-
-
-}
-
-
-
-
-
-// COMPLETE SALE
-
-function completeSale(){
-
-    if(cart.length===0){
-
-        alert("Cart is empty");
-
-        return;
-
-    }
-
-
-    let total=0;
-
-
-    cart.forEach(item=>{
-
-
-        let product =
-        products.find(
-            p=>p.id===item.id
-        );
-
-
-        product.stock -= item.qty;
-
-
-        total += item.price * item.qty;
-
-
-    });
-
-
-
-    showPaymentPopup(total);
-
-}
-
-
-
-
-function showPaymentPopup(total){
-
-
-    let popup = document.createElement("div");
-
-
-    popup.innerHTML = `
-
-    <div class="paymentBox">
-
-    <h2>
-    Payment
-    </h2>
-
-
-    <h3>
-    Total: $${total.toFixed(2)}
-    </h3>
-
-
-    <button onclick="finishPayment('cash',${total})">
-
-    💵 CASH
-
-    </button>
-
-
-    <button onclick="finishPayment('card',${total})">
-
-    💳 CARD
-
-    </button>
-
-
-    </div>
-
-    `;
-
-
-    popup.id="paymentPopup";
-
-
-    document.body.appendChild(popup);
-
-
-}
-
-
-
-
-function finishPayment(type,total){
-
-
-    if(type==="cash"){
-
-        eventData.cashSales += total;
-
-    }
-
-
-    if(type==="card"){
-
-        eventData.cardSales += total;
-
-    }
-
-
-
-    saveEvent();
-
-
-    saveProducts();
-
-
-
-    cart=[];
-
-
-    displayCart();
-
-
-    displayCheckout();
-
-
-    updateEvent();
-
-
-
-    document.getElementById("paymentPopup")
-    .remove();
-
-
-
-    alert("Sale Complete");
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-// EVENT MODE
-
-
-function startEvent(){
-
-
-let cash =
-Number(
-prompt("Starting cash amount")
-);
-
-
-
-eventData.active=true;
-
-eventData.startingCash=cash;
-
-eventData.cashSales=0;
-
-eventData.cardSales=0;
-
-
-saveEvent();
-
-
-updateEvent();
-
-
-}
-
-
-
-
-
-function updateEvent(){
-
-
-document.getElementById("startingCash")
-.innerHTML =
-eventData.startingCash;
-
-
-
-document.getElementById("cashSales")
-.innerHTML =
-eventData.cashSales.toFixed(2);
-
-
-
-document.getElementById("cardSales")
-.innerHTML =
-eventData.cardSales.toFixed(2);
-
-
-
-document.getElementById("eventTotal")
-.innerHTML =
-(
-eventData.cashSales+
-eventData.cardSales
-).toFixed(2);
-
-
-}
-
-
-
-
-
-function endEvent(){
-
-
-alert(
-
-"Total Sales: $" +
-
-(
-eventData.cashSales+
-eventData.cardSales
-
-).toFixed(2)
-
-);
-
-
-
-eventData.active=false;
-
-
-saveEvent();
-
-
-}
-
-
-
-
-
-
-
-
-// BARCODE PRINTING
-
-
-function loadBarcodeList(){
-
-
-let select =
-document.getElementById("barcodeSelect");
-
-
-select.innerHTML="";
-
-
-
-products.forEach(p=>{
-
-
-select.innerHTML += `
-
-
-<option value="${p.id}">
-
-${p.name}
-
-</option>
-
-
-`;
-
-});
-
-
-}
-
-
-
-
-
-
-
-function printOneBarcode(){
-
-
-let id =
-Number(
-document.getElementById("barcodeSelect").value
-);
-
-
-
-let p =
-products.find(x=>x.id===id);
-
-
-
-let area =
-document.getElementById("barcodePrintArea");
-
-
-
-area.innerHTML = `
-
-
-<h2>${p.name}</h2>
-
-
-<svg id="printOne"></svg>
-
-
-<p>${p.barcode}</p>
-
-
-`;
-
-
-
-JsBarcode(
-"#printOne",
-p.barcode
-);
-
-
-
-window.print();
-
-
-}
-
-
-
-
-
-function printAllBarcodes(){
-
-
-let area =
-document.getElementById("barcodePrintArea");
-
-
-area.innerHTML="";
-
-
-
-products.forEach((p,index)=>{
-
-
-area.innerHTML += `
-
-
-<h2>${p.name}</h2>
-
-
-<svg id="print-${index}"></svg>
-
-
-<p>${p.barcode}</p>
-
-
-<hr>
-
-
-`;
-
-
-
-setTimeout(()=>{
-
-
-JsBarcode(
-"#print-"+index,
-p.barcode
-);
-
-
-},100);
-
-
-
-});
-
-
-
-setTimeout(()=>{
-
-window.print();
-
-},500);
-
-
-
-}
-
 
 
 
@@ -885,18 +659,18 @@ window.print();
 function updateDashboard(){
 
 
-let a =
+let p =
 document.getElementById("totalProducts");
 
 
-let b =
+let s =
 document.getElementById("totalStock");
 
 
 
-if(a){
+if(p){
 
-a.innerHTML=products.length;
+p.innerHTML=products.length;
 
 }
 
@@ -905,25 +679,26 @@ a.innerHTML=products.length;
 let total=0;
 
 
-products.forEach(p=>{
 
-total+=p.stock;
+products.forEach(x=>{
+
+total+=x.stock;
 
 });
 
 
 
-if(b){
+if(s){
 
-b.innerHTML=total;
+s.innerHTML=total;
+
+}
+
 
 }
 
 
-}
 
 
 
 updateDashboard();
-
-updateEvent();

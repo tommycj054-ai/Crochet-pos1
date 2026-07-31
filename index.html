@@ -9,6 +9,12 @@
 
 <link rel="stylesheet" href="style.css">
 
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#ff7a00">
+
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
 </head>
 
 
@@ -61,18 +67,22 @@
 
 
 
+
 <!-- CHECKOUT -->
 
 <div id="checkout" class="page">
 
 
-<h2>Checkout</h2>
+<h2>
+🛒 Checkout
+</h2>
+
 
 
 <div id="checkoutCamera"></div>
 
 
-<button onclick="startCheckoutScanner()">
+<button class="bigButton" onclick="startCheckoutScanner()">
 
 📷 Scan Barcode
 
@@ -80,154 +90,59 @@
 
 
 
-<div id="productButtons"></div>
+
+
+<h2>
+Products
+</h2>
 
 
 
-<h2>Cart</h2>
+<div id="productButtons">
+
+</div>
 
 
-<div id="cart"></div>
+
+
 
 
 
 <h2>
+Cart
+</h2>
+
+
+<button class="clearButton" onclick="clearCart()">
+
+🗑 Clear Cart
+
+</button>
+
+
+
+<div id="cart">
+
+</div>
+
+
+
+
+<h2>
+
 Total: $
+
 <span id="cartTotal">
 0
 </span>
+
 </h2>
+
 
 
 <button class="bigButton" onclick="completeSale()">
 
-Complete Sale
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- BARCODE PRINTING -->
-
-<div id="barcodes" class="page hidden">
-
-
-<h2>
-🏷️ Barcode Printing
-</h2>
-
-
-
-<select id="barcodeSelect">
-
-</select>
-
-
-
-<button onclick="printOneBarcode()">
-
-Print Selected Barcode
-
-</button>
-
-
-
-
-<button onclick="printAllBarcodes()">
-
-Print All Barcodes
-
-</button>
-
-
-
-
-<div id="barcodePrintArea">
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- EVENT -->
-
-<div id="event" class="page hidden">
-
-
-<h2>
-💵 Craft Show Event
-</h2>
-
-
-
-<button onclick="startEvent()">
-
-Start Event
-
-</button>
-
-
-
-<p>
-Starting Cash:
-$<span id="startingCash">
-0
-</span>
-</p>
-
-
-
-<p>
-Cash Sales:
-$<span id="cashSales">
-0
-</span>
-</p>
-
-
-
-
-<p>
-Card Sales:
-$<span id="cardSales">
-0
-</span>
-</p>
-
-
-
-<p>
-Total Sales:
-$<span id="eventTotal">
-0
-</span>
-</p>
-
-
-
-
-<button onclick="endEvent()">
-
-End Event
+✅ Complete Sale
 
 </button>
 
@@ -245,16 +160,17 @@ End Event
 
 <!-- INVENTORY -->
 
-
 <div id="inventory" class="page hidden">
 
 
 <h2>
-Inventory
+📦 Inventory
 </h2>
 
 
-<div id="inventoryList"></div>
+<div id="inventoryList">
+
+</div>
 
 
 </div>
@@ -269,17 +185,15 @@ Inventory
 
 <!-- ADD PRODUCT -->
 
-
 <div id="add" class="page hidden">
 
 
 <h2>
-Add Product
+➕ Add Product
 </h2>
 
 
-
-<input id="name" placeholder="Name">
+<input id="name" placeholder="Product Name">
 
 
 <input id="price" placeholder="Price" type="number">
@@ -296,20 +210,17 @@ Add Product
 </select>
 
 
-
-<input id="barcode" placeholder="Barcode optional">
-
+<input id="barcode" placeholder="Barcode">
 
 
 <input id="stock" placeholder="Stock" type="number">
-
 
 
 <input id="photo" type="file" accept="image/*">
 
 
 
-<button onclick="addProduct()">
+<button class="bigButton" onclick="addProduct()">
 
 Add Product
 
@@ -326,20 +237,105 @@ Add Product
 
 
 
+<!-- BARCODE PAGE -->
+
+<div id="barcodes" class="page hidden">
+
+
+<h2>
+🏷️ Barcodes
+</h2>
+
+
+<select id="barcodeSelect"></select>
+
+
+<button onclick="printOneBarcode()">
+
+Print One
+
+</button>
+
+
+<button onclick="printAllBarcodes()">
+
+Print All
+
+</button>
+
+
+<div id="barcodePrintArea"></div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- EVENT -->
+
+<div id="event" class="page hidden">
+
+
+<h2>
+💵 Craft Show
+</h2>
+
+
+<button onclick="startEvent()">
+
+Start Event
+
+</button>
+
+
+
+<p>
+Cash:
+$<span id="cashSales">0</span>
+</p>
+
+
+<p>
+Card:
+$<span id="cardSales">0</span>
+</p>
+
+
+<p>
+Total:
+$<span id="eventTotal">0</span>
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
 <!-- DASHBOARD -->
 
 <div id="dashboard" class="page hidden">
 
 
 <h2>
-Dashboard
+📊 Dashboard
 </h2>
-
 
 
 <div class="card">
 
 Products:
+
 <span id="totalProducts">
 0
 </span>
@@ -347,10 +343,10 @@ Products:
 </div>
 
 
-
 <div class="card">
 
 Stock:
+
 <span id="totalStock">
 0
 </span>
@@ -358,7 +354,6 @@ Stock:
 </div>
 
 
-
 </div>
 
 
@@ -366,10 +361,7 @@ Stock:
 
 
 
-
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
